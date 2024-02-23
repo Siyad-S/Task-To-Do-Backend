@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler")
 const toDos = require("../models/toDoModel")
 
-// post
+// get
 const getTasks = asyncHandler(async (req, res) => {
     try{
         const taskData = await toDos.find()
@@ -9,6 +9,21 @@ const getTasks = asyncHandler(async (req, res) => {
         if (!taskData) {
             res.status(404).json({message: "error on get", taskData})
         }
+    } catch(error) {
+        console.log(error);
+    }
+})
+
+// single get
+const getTask = asyncHandler(async (req, res) => {
+    try{
+        const taskData = await toDos.findById(req.params.id)
+        if (!taskData) {
+            res.status(404).json({message: "error on get"})
+        } else {
+            res.status(200).json({message: "data gotten successfully", taskData})
+        }
+
     } catch(error) {
         console.log(error);
     }
@@ -39,18 +54,33 @@ const postTask = asyncHandler(async (req, res) => {
 
 
 //update
-const updateTask = asyncHandler( async (req, res) => {
+const updateTask = asyncHandler(async (req, res) => {
     try {
-        if(!req.body) {
-            res.status(404).json({message: "data doesn't available for update"})
-        } else {
-            const taskData = await toDos.findByIdAndUpdate(...req.body, req.params.id, {new:true})
-            res.status(200).json({message: "data posted successfully", taskData})
+        const { title, type, description, dueDate } = req.body;
+        // if (!title || !type || !description || !dueDate) {
+        //     res.status(400).json({ message: "Incomplete data" });
+        //     return;
+        // }
+
+        const taskData = await toDos.findByIdAndUpdate(req.params.id, {
+            title,
+            type,
+            description,
+            dueDate,
+        }, { new: true });
+
+        if (!taskData) {
+            res.status(404).json({ message: "Task not found" });
+            return;
         }
-    } catch(error) {
-        console.log(error);
+
+        res.status(200).json({ message: "Task updated successfully", taskData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
-})
+});
+
 
 //delete
 const deleteTask = asyncHandler( async (req, res) => {
@@ -67,6 +97,7 @@ const deleteTask = asyncHandler( async (req, res) => {
 })
 
 module.exports = {
+    getTask,
     getTasks,
     postTask,
     updateTask,
