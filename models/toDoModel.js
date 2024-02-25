@@ -6,7 +6,6 @@ const toDoSchema = mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["urgent", "important", "optional"],
   },
   description: {
     type: String,
